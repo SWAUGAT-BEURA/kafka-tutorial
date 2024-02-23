@@ -1,0 +1,5 @@
+{
+    "paths": {
+            "@nestjs-microservices/shared/dto": ["src/lib/dto/index.ts"]
+    }
+}
