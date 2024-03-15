@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthServiceService } from './auth-service.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ClientsModule, KafkaLogger, Transport } from '@nestjs/microservices';
 import { AuthModuleController } from './auth-module.controller';
+import { logLevel } from 'kafkajs';
 
 @Module({
   imports: [
@@ -13,9 +14,11 @@ import { AuthModuleController } from './auth-module.controller';
         client: {
           clientId: 'auth',
           brokers: ['localhost:9092'],
+          logLevel:logLevel.INFO,
+          logCreator:KafkaLogger,
         },
         consumer: {
-          groupId: 'auth-consumer-server',
+          groupId: 'auth-consumer',
         },
       },
      },
