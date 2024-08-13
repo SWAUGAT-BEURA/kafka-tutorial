@@ -1,17 +1,29 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Post, Body, Inject } from '@nestjs/common';
+import { ClientKafka } from '@nestjs/microservices';
+import { CreateUserDto } from './dto/create-user.dto';
 
-@Controller()
+@Controller('auth')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
+  ) {}
 
-  @Get()
-  getHello(): any {
-    return {
-      statusCode: 200,
-      message: this.appService.getHello(),
-      date: new Date().toISOString()
-      
-    }
+  async onModuleInit() {
+    this.kafkaClient.subscribeToResponseOf('register-user');
+    this.kafkaClient.subscribeToResponseOf('validate-user');
+    this.kafkaClient.subscribeToResponseOf('login');
+    await this.kafkaClient.connect();
+  }
+
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    console.log('registering user');
+    return this.kafkaClient.send('register-user', createUserDto);
+  }
+
+  @Post('login')
+  async login(@Body() user: any) {
+    console.log('logging in user');
+    return this.kafkaClient.send('login', user);
   }
 }
